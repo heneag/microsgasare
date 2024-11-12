@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Venta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+        }
+        .totales {
+            font-size: 1.1em;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .totales span {
+            font-weight: bold;
+        }
+        .botones {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .resumen {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+        .resumen span {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cálculo de Venta</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Tamaño</th>
+                <th>Precio Tiendas (Q)</th>
+                <th>Precio Mayoreo (Q)</th>
+                <th>Precio Detalle (Q)</th>
+                <th>Cantidad</th>
+                <th>Subtotal (Q)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>0.7</td>
+                <td>675.00</td>
+                <td>287.50</td>
+                <td>345.00</td>
+                <td><input type="number" min="0" value="0" data-tamano="0.7"></td>
+                <td class="subtotal">0.00</td>
+            </tr>
+            <tr>
+                <td>0.8</td>
+                <td>655.00</td>
+                <td>362.50</td>
+                <td>435.00</td>
+                <td><input type="number" min="0" value="0" data-tamano="0.8"></td>
+                <td class="subtotal">0.00</td>
+            </tr>
+            <tr>
+                <td>0.9</td>
+                <td>809.00</td>
+                <td>362.50</td>
+                <td>435.00</td>
+                <td><input type="number" min="0" value="0" data-tamano="0.9"></td>
+                <td class="subtotal">0.00</td>
+            </tr>
+            <tr>
+                <td>1.1</td>
+                <td>1029.00</td>
+                <td>425.00</td>
+                <td>510.00</td>
+                <td><input type="number" min="0" value="0" data-tamano="1.1"></td>
+                <td class="subtotal">0.00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="totales">
+        <p>Total artículos: <span id="totalCantidad">0</span></p>
+        <p class="total">Total venta (Q): <span id="totalVenta">0.00</span></p>
+    </div>
+
+    <div class="resumen">
+        <p>Precio Mayoreo Total: <span id="precioMayoreo">0.00</span> Q</p>
+        <p>Precio Regular Total: <span id="precioRegular">0.00</span> Q</p>
+        <p>Monto Ahorrado (Mayoreo vs. Regular): <span id="montoAhorro">0.00</span> Q</p>
+    </div>
+
+    <div class="botones">
+        <button id="calcular">Calcular</button>
+        <button id="limpiar">Limpiar</button>
+    </div>
+
+    <script>
+        document.getElementById('calcular').addEventListener('click', calcularTotales);
+        document.getElementById('limpiar').addEventListener('click', limpiarTotales);
+
+        function calcularTotales() {
+            let totalCantidad = 0;
+            let totalVenta = 0;
+            let precioMayoreoTotal = 0;
+            let precioRegularTotal = 0;
+
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const cantidad = parseInt(row.querySelector('input').value) || 0;
+                const precioMayoreo = parseFloat(row.cells[2].textContent);
+                const precioDetalle = parseFloat(row.cells[3].textContent);
+
+                totalCantidad += cantidad;
+
+                // Determinar precio aplicado
+                const precioAplicado = totalCantidad >= 6 ? precioMayoreo : precioDetalle;
+
+                // Calcular subtotales
+                const subtotalMayoreo = cantidad * precioMayoreo;
+                const subtotalRegular = cantidad * precioDetalle;
+                precioMayoreoTotal += subtotalMayoreo;
+                precioRegularTotal += subtotalRegular;
+
+                const subtotal = cantidad * precioAplicado;
+                totalVenta += subtotal;
+
+                row.querySelector('.subtotal').textContent = subtotal.toFixed(2);
+            });
+
+            // Actualizar totales
+            document.getElementById('totalCantidad').textContent = totalCantidad;
+            document.getElementById('totalVenta').textContent = totalVenta.toFixed(2);
+            document.getElementById('precioMayoreo').textContent = precioMayoreoTotal.toFixed(2);
+            document.getElementById('precioRegular').textContent = precioRegularTotal.toFixed(2);
+            document.getElementById('montoAhorro').textContent = (precioRegularTotal - precioMayoreoTotal).toFixed(2);
+        }
+
+        function limpiarTotales() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = 0;
+            });
+            document.querySelectorAll('.subtotal').forEach(subtotal => {
+                subtotal.textContent = "0.00";
+            });
+            document.getElementById('totalCantidad').textContent = 0;
+            document.getElementById('totalVenta').textContent = "0.00";
+            document.getElementById('precioMayoreo').textContent = "0.00";
+            document.getElementById('precioRegular').textContent = "0.00";
+            document.getElementById('montoAhorro').textContent = "0.00";
+        }
+    </script>
+</body>
+</html>
